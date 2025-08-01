@@ -1,0 +1,43 @@
+# 文件保存位置: /etc/systemd/system/file-sync.service
+[Unit]
+Description=Real-time File Synchronization Service
+Documentation=File sync service for real-time directory synchronization
+After=network.target network-online.target
+Wants=network-online.target
+Requires=network.target
+
+[Service]
+Type=simple
+User=your_username
+Group=your_group
+WorkingDirectory=/home/your_username
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=HOME=/home/your_username
+
+# 修改以下路径和参数
+ExecStart=/path/to/sync_files.sh -k /home/your_username/.ssh/id_rsa -e "*.tmp" -e ".git" -e "*.log" /local/source/path user@remote.host /remote/target/path
+
+# 服务管理
+Restart=always
+RestartSec=10
+StartLimitInterval=300
+StartLimitBurst=5
+
+# 资源限制
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# 日志配置
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=file-sync
+
+# 安全配置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/your_username /var/log /tmp
+
+[Install]
+WantedBy=multi-user.target
